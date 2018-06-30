@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# Created on 30 June, 2018, by copyright owner
-# Last Modified on: 30 June, 2018, by copyright owner
-# Copyright (c) 2018 Dr. Arapauat V. Sivaprasad
+# Created on 30 June, 2018 By: Dr. Arapauat V. Sivaprasad
+# Last Modified on: 30 June, 2018. By: Do.
+# Copyright (c) 2018, Geoscience Australia and Dr. Arapauat V. Sivaprasad
 # Licence: GPL-3.0
 # ------------------------------------------------------------------------------
 '''
@@ -41,22 +41,50 @@ import yaml
 import json
 
 # Globals
-item_dict = {} # This is what gets written out as item_json
+item_dict = {} # This is what gets written out as item.json
 
+# ------------------------------------------------------------------------------
+# _default_config:
+# Check that the config file exists. By default it is './stac.yaml'
+# Example:
+"""
+    base_url:
+        http://dea-public-data.s3-ap-southeast-2.amazonaws.com/S2_MSI_ARD
+    input_dir:
+        /g/data/dz56/datacube/002/S2_MSI_ARD/packaged
+    subset:
+        05S105E-10S110E
+    output_dir:
+        ./Json
+"""
+# Only the output_dir needs write permission
+# The 'subset' is either the date as '2018-06-29', tile number as '05S105E-10S110E' 
+# or any other dirname that holds the items as subdirs.
+# ------------------------------------------------------------------------------
 def _default_config(ctx, param, value):
     if path.exists(value):
         return value
 
     ctx.fail('STAC_CONFIG_FILE not provided.')
 
+# ------------------------------------------------------------------------------
+# get_bounds_geojson:
+# Read and load the 'bounds.geojson'
+# This file lists the 'geometry' of the polygon that represents the scene/tile
+# ------------------------------------------------------------------------------
 def get_bounds_geojson(item_json):
     with open(saved_bounds_geojson) as f:
         geodata = json.load(f)
-        print(type(geodata))
         print (geodata['features'][0]['geometry'])
         geometry = geodata['features'][0]['geometry']
         item_dict['geometry'] = geometry
 
+# ------------------------------------------------------------------------------
+# create_item_dict:
+# Create a dictionary structure of the required values. This will be written out 
+# as the 'output_dir/item.json'
+# These output files are STAC compliant and must be viewable with any STAC browser.
+# ------------------------------------------------------------------------------
 def create_item_dict(item,ard,geodata,base_url):
     item_dict['id'] = ard['id']
     item_dict['type'] = 'Feature'
@@ -74,8 +102,8 @@ def create_item_dict(item,ard,geodata,base_url):
     item_dict['properties']['license'] = 'PDDL-1.0'
 
     item_dict['links'] = [0,0]
-    item_json_file = 'Json/' + item + ".json"
-    item_json_url = base_url + "/" + item + ".json"
+#    item_json_file = 'Json/' + item + ".json"
+    item_json_url = base_url + item + ".json"
     item_dict['links'][0] = {'rel': 'self', 'href': item_json_url}
 
     item_json_map_url = base_url + item + '/map.html'
@@ -84,7 +112,7 @@ def create_item_dict(item,ard,geodata,base_url):
     item_dict['assets'] = {}
     item_dict['assets']['map'] = {'href': item_json_map_url, "required": 'true', "type": "html"}
 
-    ard_metadata_url = base_url + "/" + item + "/ARD-METADATA.yaml"
+    ard_metadata_url = base_url + item + "/ARD-METADATA.yaml"
     item_dict['assets']['metadata'] = {'href': ard_metadata_url, "required": 'true', "type": "yaml"}
 
     j =0
@@ -92,8 +120,13 @@ def create_item_dict(item,ard,geodata,base_url):
     for key in bands:
         j += 1
         path = ard['image']['bands'][key]['path']
-        item_dict['assets'][key] = {'href': path, "required": 'true', "type": "GeoTIFF", "eo:band":j}
+        item_dict['assets'][key] = {'href': path, "required": 'true', "type": "GeoTIFF", "eo:band":[j]}
 
+# ------------------------------------------------------------------------------
+# create_jsons:
+# Iterate through all items and create a JSON file for each.
+# Will skip an item if either the 'ARD-METADATA.yaml' or 'bounds.geojson' is missing or empty.
+# ------------------------------------------------------------------------------
 def create_jsons(input_dir,base_url,output_dir):
     items_dirs = os.listdir(input_dir)
     for item in items_dirs:
@@ -113,15 +146,26 @@ def create_jsons(input_dir,base_url,output_dir):
         else:
             print("*** No file(s). SKIPPING ***:", item)
 
-        item_json_file = output_dir + "/" + item + ".json"
+        # Write out the JSON files.
+        item_json_file = output_dir + item + ".json"
         with open(item_json_file, 'w') as file:
-             file.write(json.dumps(item_dict)) 
-        print("Wrote: ", item_json_file)         
+             file.write(json.dumps(item_dict,indent=1)) 
+             print("Wrote: ", item_json_file)         
 
+# ------------------------------------------------------------------------------
+# usage:
+# Help info to run. Invoke it with --info=usage
+# ------------------------------------------------------------------------------
 def usage():
     print("Usage: ./parse_direct.py config.yaml, where the input/output dirs and date/tile are given. Default=stac.yaml. \
 Output files (*.json) will be created for each item in the input dir.")
 
+
+
+# ------------------------------------------------------------------------------
+# main:
+# The main function.
+# ------------------------------------------------------------------------------
 @click.command(name='parse_direct')
 @click.argument('stac_config_file', type=str, callback=_default_config, default='stac.yaml',
                 metavar='STAC_CONFIG_FILE')
@@ -132,16 +176,25 @@ def main(stac_config_file,info):
     else:
         config = yaml.load(open(stac_config_file))
         base_url = config['base_url']
-    
+        base_url = path.join(base_url, '')
+        
         input_dir = config['input_dir']
-        subset = config['subset'] # Subset is defined separately so that it can be a date or tile number
+        input_dir = path.join(input_dir, '')
+
+        # Subset is defined separately so that it can be a date or tile number
+        subset = config['subset'] 
+        subset = path.join(subset, '')
     
-        base_url = base_url + "/" + subset
-        input_dir = input_dir + "/" + subset
+        base_url = base_url + subset
+        input_dir = input_dir + subset
         
         output_dir = config['output_dir']
+        output_dir = path.join(output_dir, '')
+        
+        # Iterate through all items abd create a JSON file for each.
         create_jsons(input_dir,base_url,output_dir)
 
+# ------------------------------------------------------------------------------
 # Standard boilerplate to call the main() function.
 if __name__ == '__main__':
   main()
