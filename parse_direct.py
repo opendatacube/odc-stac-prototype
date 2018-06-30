@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-# Created on 30 June, 2018 By: Dr. Arapauat V. Sivaprasad
-# Last Modified on: 30 June, 2018. By: Do.
+# Created on: 30 June, 2018 by Dr. Arapauat V. Sivaprasad
+# Last Modified on: 30 June, 2018 by Dr. Arapauat V. Sivaprasad
 # Copyright (c) 2018, Geoscience Australia and Dr. Arapauat V. Sivaprasad
 # Licence: GPL-3.0
 # ------------------------------------------------------------------------------
@@ -22,7 +22,6 @@ PROGRAM FLOW:
 
 3. Parses the above files to create the 'item.json' which contains all assets.
     e.g. output_dir/S2B_OPER_MSI_ARD_TL_SGS__20171202T014216_A003860_T56LMP_N02.06.json
-
 '''
 # ------------------------------------------------------------------------------
 import click
@@ -46,7 +45,11 @@ import json
 """
 # Only the output_dir needs write permission.
 # The 'subset' is either the date as '2018-06-29', tile number as '05S105E-10S110E' 
-# or any other dirname that holds the items as subdirs.
+# To generate for all subsets in a dir, use its value as 'A' (no quotes)
+# This will be required in the case of tile numbers as teh names of subsets
+#
+# In the case of date as subsets give the date. In practice, it may be necessary to 
+# dynamically create the 'stac.yaml' file with the date.
 # ------------------------------------------------------------------------------
 def _default_config(ctx, param, value):
     if os.path.exists(value):
@@ -88,12 +91,12 @@ def create_item_dict(item,ard,geodata,base_url,item_dict):
     item_dict['properties']['provider'] = 'GA'
     item_dict['properties']['license'] = 'PDDL-1.0'
 
-    item_dict['links'] = [0,0]
-    item_json_url = base_url + item + ".json"
+    item_dict['links'] = [0]
+    item_json_url = base_url + item + "/" + item + ".json"
     item_dict['links'][0] = {'rel': 'self', 'href': item_json_url}
 
     item_json_map_url = base_url + item + '/map.html'
-    item_dict['links'][1] = {'rel': 'alternate', 'href': item_json_map_url, 'type':'html'}
+#    item_dict['links'][1] = {'rel': 'alternate', 'href': item_json_map_url, 'type':'html'}
 
     item_dict['assets'] = {}
     item_dict['assets']['map'] = {'href': item_json_map_url, "required": 'true', "type": "html"}
@@ -113,8 +116,10 @@ def create_item_dict(item,ard,geodata,base_url,item_dict):
 # Iterate through all items and create a JSON file for each.
 # Will skip an item if either the 'ARD-METADATA.yaml' or 'bounds.geojson' is missing or empty.
 # ------------------------------------------------------------------------------
-def create_jsons(input_dir,base_url,output_dir):
+def create_jsons(input_dir,base_url,output_dir,subset):
+#    j = 0
     items_dirs = os.listdir(input_dir)
+    i = len(items_dirs)
     for item in items_dirs:
         item_dict = {} # Blank out the array for each item. Not really necessary!
         item_dir = os.path.join(input_dir,item)
@@ -134,10 +139,19 @@ def create_jsons(input_dir,base_url,output_dir):
             print("*** No file(s). SKIPPING ***:", item)
 
         # Write out the JSON files.
-        item_json_file = output_dir + item + ".json"
+        item_output_dir = output_dir + subset + item
+#        print (item_output_dir)
+        if not os.path.exists(item_output_dir):
+            os.makedirs(item_output_dir)
+            item_output_dir = os.path.join(item_output_dir, '')
+        item_json_file = item_output_dir + "/" + item + ".json"
+#       item_json_file = item_output_dir + item + ".json"
+#        print (item_json_file)
         with open(item_json_file, 'w') as file:
              file.write(json.dumps(item_dict,indent=1)) 
-             print("Wrote: ", item_json_file)         
+             print("{}. {}".format(i, item_json_file)) 
+             i -= 1
+#             break
 
 # ------------------------------------------------------------------------------
 # usage:
@@ -170,16 +184,38 @@ def main(stac_config_file,info):
 
         # Subset is defined separately so that it can be a date or tile number
         subset = config['subset'] 
-        subset = os.path.join(subset, '')
+        
+        # Specify a subset as 2018-06-30 for L2. 
+        # Option 'A' is suitable for S2_MSI_ARD where multiple tiles are involved
+        if(subset is not 'A'):
+            subset = os.path.join(subset, '')
     
-        base_url = base_url + subset
-        input_dir = input_dir + subset
+            base_url = base_url + subset
+            input_dir = input_dir + subset
+            
+            output_dir = config['output_dir']
+            output_dir = os.path.join(output_dir, '')
+            
+            # Iterate through all items abd create a JSON file for each.
+            create_jsons(input_dir,base_url,output_dir,subset)
+        else:
+            subsets = os.listdir(input_dir)
+            for subset in subsets:
+                subset = os.path.join(subset, '')
         
-        output_dir = config['output_dir']
-        output_dir = os.path.join(output_dir, '')
-        
-        # Iterate through all items abd create a JSON file for each.
-        create_jsons(input_dir,base_url,output_dir)
+                base_url = base_url + subset
+                input_dir = input_dir + subset
+                
+                output_dir = config['output_dir']
+                output_dir = os.path.join(output_dir, '')
+                
+                output_subset_dir = output_dir + subset
+                if not os.path.exists(output_subset_dir):
+                    os.makedirs(output_subset_dir)
+
+                # Iterate through all items abd create a JSON file for each.
+                create_jsons(input_dir,base_url,output_dir,subset)
+                break
 
 # ------------------------------------------------------------------------------
 # Standard boilerplate to call the main() function.
