@@ -5,4 +5,4 @@ input_dir:
 subset:
     05S105E-10S110E
 output_dir:
-    Json
+    ./Json
