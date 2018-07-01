@@ -1,3 +1,10 @@
+#+TITLE: STAC Catalog Json Generation
+#+DATE: <2018-07-01 Sun>
+#+AUTHOR: Dr. Arapaut V. Sivaprasad
+#+EMAIL: Sivaprasad.Arapaut@ga.gov.au, avs@webgenie.com
+#+LANGUAGE: en
+#+URL: https://github.com/opendatacube/odc-stac-prototype
+
 # STAC Catalog Json Generation
 
 
@@ -123,7 +130,7 @@ This program creates STAC catalog Jsons for the GeoTIFFs in the DEA Staging area
 
 ## Instructions To Run
 
-1. Create a config file, e.g. stac.yaml, with the following content. 
+1. Create a config file, e.g. stac.yaml or any other name, with the following content. 
 
 ```
 """
@@ -137,16 +144,24 @@ This program creates STAC catalog Jsons for the GeoTIFFs in the DEA Staging area
         ./Json
 ```
 NOTES:
-    - Only the output_dir needs write permission.
+    - Only the 'output_dir' needs write permission. In production mode it will teh same as the 'input_dir'.
     - The 'subset' is either the date as '2018-06-29'or tile number as '05S105E-10S110E' 
     - To generate for all subsets in a dir, use its value as 'A' (no quotes)
-        - This will be required in the case of tile numbers as the names of subsets
-    - In the case of date as subsets give the date. In practice, it may be necessary to dynamically create the 'stac.yaml' file with the date.
+        - This will be required in the case of tile numbers as subsets.
+    - In the case of date as subsets give just the date. 
+    - In practice, it may be necessary to dynamically create the 'stac.yaml' file or pass the params in commandline.
 
-2. Run the program from the commandline as
+2. Run the program from the commandline as below.
 
 > parse_direct.py stac.yaml
 
+or
+
+> parse_direct.py --base_url=url --input_dir=path --subset=str --output_dir=path
+
+
 ## Instructions To Setup As Cron Job
 
-It depends on how the current setup is with regard to updating the staging area. The easiest way will be to add a line to execute the program from within the program that creates and uploads all other files to the staging area. More details shall be added here after the updating process is clearly understood.
+It depends on how the current setup is with regard to updating the staging area. The easiest way will be to add a line to execute the program from within the program that creates and uploads all other files to the staging area. 
+
+More details shall be added here after the updating process is clearly understood.
