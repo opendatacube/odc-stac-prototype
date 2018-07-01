@@ -18,7 +18,7 @@ The core of a Spatio-Temporal Asset Catalog (STAC) is set of JSON fields defined
 
 ### This program is designed to create the STAC-compliant JSON file for the items.
 
-It is expected to be part of the cron jobs that daily update the DEA Staging area. 
+It is expected to be part of the cron jobs that daily update the DEA Data Staging area. 
 
 ```
 DEA Data Staging Area
@@ -37,7 +37,7 @@ Last Modified                   Size           Key
                                 0              L2/
                                 0              LHTC_Tides/
                                 0              S2-Sample-Products/
-                                0              S2_MSI_ARD/
+                                0              **S2_MSI_ARD/**
                                 0              bench-data/
                                 0              ewater/
                                 0              geomedian-australia/
