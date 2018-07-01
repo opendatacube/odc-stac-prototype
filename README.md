@@ -119,22 +119,18 @@ Run as part of the cron job that creates and uploads GeoTIFFs from NetCDF.
 1. Create a config file, e.g. stac.yaml or any other name, with the following content. 
 
 ```
-    base_url:
-        http://dea-public-data.s3-ap-southeast-2.amazonaws.com/S2_MSI_ARD
-    input_dir:
-        /g/data/dz56/datacube/002/S2_MSI_ARD/packaged
-    subset:
-        05S105E-10S110E
-    output_dir:
-        ./Json
+base_url:       http://dea-public-data.s3-ap-southeast-2.amazonaws.com/S2_MSI_ARD
+input_dir:      /g/data/dz56/datacube/002/S2_MSI_ARD/packaged
+subset:         05S105E-10S110E
+output_dir:     /tmp
+
 ```
 NOTES:
 ```    
     - Only the 'output_dir' needs write permission. In production mode it will be the same as the 'input_dir'.
     - The 'subset' is either the date as '2018-06-29', tile number as '05S105E-10S110E' or as the case may be.
     - To generate a stac.json for all subsets in a directory, use its value as 'A'
-        subset:
-             A
+        subset: A
         - It may be required in the case of tiles, as temporal data is spread across them.
     - In the case of date as subsets give just the date. 
 ```
