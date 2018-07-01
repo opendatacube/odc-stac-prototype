@@ -9,8 +9,10 @@ DESCRIPTION:
 This program creates STAC catalog JSONs for the GeoTIFFs in the DEA Data Staging area.
 
 This is a parallelised version of 'parse_direct.py' and gives ~20X speed improvement
-over the serial program. However, this may not be suitable for the cron jobs if they
-run on shared servers. You must start an interactive queue on Raijin (qsub -I) to run this.
+over the serial program which processes ~3 items per second. 
+
+However, this may not be suitable for the cron jobs if they run on shared servers. 
+You must start an interactive queue on Raijin (qsub -I) to run this.
 
 Though it will auto detect the VDI and Raijin login nodes and exit,
 there is no check for other hostnames. Therefore, running this on other hosts may
@@ -53,7 +55,6 @@ base_url = ''
 output_dir = ''
 subset = ''
 
-
 # ------------------------------------------------------------------------------
 # _default_config:
 # Check that the config file exists. By default it is './stac.yaml'
@@ -63,8 +64,7 @@ base_url:       http://dea-public-data.s3-ap-southeast-2.amazonaws.com/S2_MSI_AR
 input_dir:      /g/data/dz56/datacube/002/S2_MSI_ARD/packaged
 subset:         05S105E-10S110E
 output_dir:     /tmp
-"""
-"""
+
 - Only the 'output_dir' needs write permission. In production mode it will be the same as the 'input_dir'.
 - The 'subset' is either the date as '2018-06-29', tile number as '05S105E-10S110E' or as the case may be.
 - To generate a STAC.json for all subsets in a directory, use its value as 'A'. 
@@ -73,10 +73,15 @@ output_dir:     /tmp
 - In the case of date as subset, give it as below. 
     subset: 2018-06-29
 """
+def _default_config(ctx, param, value):
+     if os.path.exists(value):
+         return value
+     ctx.fail('STAC_CONFIG_FILE not provided.')
+
 # ------------------------------------------------------------------------------
 # create_item_dict:
 # Create a dictionary structure of the required values. This will be written out 
-# as the 'output_dir/item.json'
+# as the 'output_dir/subset/item/STAC.json'
 # These output files are STAC compliant and must be viewable with any STAC browser.
 # ------------------------------------------------------------------------------
 def create_item_dict(item,ard,geodata,base_url,item_dict):
@@ -148,7 +153,6 @@ def create_jsons(item):
     else:
         with open(item_json_file, 'w') as file:
              file.write(json.dumps(item_dict,indent=1)) 
-#             print("{}".format(item_json_file)) 
         time.sleep(1) # make this wait long enough to finish the processing
 
 def parallel_process():
@@ -160,7 +164,6 @@ def parallel_process():
     print("Cores: {}; Items to be processed: {}".format(cores,limit))
     pool.map(create_jsons, items_dirs[:limit]) # Send $cores files each time until the set limit         
     print("Finished !")    
-
     
 # ------------------------------------------------------------------------------
 # usage:
@@ -188,7 +191,7 @@ Usage:\n\
 # 
 # ------------------------------------------------------------------------------
 @click.command(name='parse_direct')
-@click.argument('stac_config_file', type=str, default='stac.yaml', metavar='STAC_CONFIG_FILE')
+@click.argument('stac_config_file', type=str, default='stac.yaml', callback=_default_config, metavar='STAC_CONFIG_FILE')
 @click.option('--info', type=str, help='Type --info=yes to get additional info.')
 @click.option('--base_urlp', type=str, help='URL of the product. e.g. https://FQDN/S2_MSI_ARD',default='')
 @click.option('--input_dirp', type=str, help='Full path of the directory where the subsets are. e.g. /g/data/dz56/datacube/002/S2_MSI_ARD/packaged',default='')
@@ -224,9 +227,9 @@ def main(stac_config_file,base_urlp,input_dirp,subsetp,output_dirp,info):
                 base_url = base_url + subset
                 input_dir = input_dir + subset
                 
-                # Iterate through all items abd create a JSON file for each.
+                # Iterate through all items and create a JSON file for each.
                 parallel_process()
-            else:
+            else: # Note: This part is not tested yet!
                 subsets = os.listdir(input_dir)
                 for subset in subsets:
                     subset = os.path.join(subset, '')
@@ -239,7 +242,7 @@ def main(stac_config_file,base_urlp,input_dirp,subsetp,output_dirp,info):
                         os.makedirs(output_subset_dir)
     
                     # Iterate through all items abd create a JSON file for each.
-                    create_jsons(input_dir,base_url,output_dir,subset)
+                    parallel_process()
 #                    break # Activate for limiting the iteration to just one subset. 
 
 # ------------------------------------------------------------------------------
