@@ -19,7 +19,7 @@ The core of a Spatio-Temporal Asset Catalog (STAC) is set of JSON fields defined
 
 ### This program is designed to create the STAC-compliant JSON file for the items.
 
-It is expected to be part of the cron jobs that daily update the DEA Data Staging area, whose structure is given below. 
+It is expected to be part of the cron jobs that daily update the DEA Data Staging area. The structure of the DEA Data Staging Area is given below. 
 
 ```
 DEA Data Staging Area
@@ -88,12 +88,15 @@ http://dea-public-data.s3-ap-southeast-2.amazonaws.com / L2 / sentinel-2-nrt / S
 ```
 ##### We need a STAC-compliant Json file, STAC.json, in the last directory above.
 
-This STAC.json can, presumably, be read by a third party STAC browser similar to [this](http://iserv-stac.netlify.com/item/2014/01/02/IPR201401020901061496N02371W) without a need to write separate code to interpret the data.
+This STAC.json can, presumably, be read by a third party STAC browser similar to [this](http://iserv-stac.netlify.com/item/2014/01/02/IPR201401020901061496N02371W) or [this](https://s3-us-west-2.amazonaws.com/ai-gravitylab-stacbrowser/stacb.html) without a need to write separate code to interpret the data.
 
 ## Program Overview
 The program, 'parse_direct.py', is a python program that can be executed as commandline, within a bash script or within crontab. The code is self-contained and requires only the standard Python modules. Parameters to the program can be given in a configuration file in YAML format or as commandline params.
 
 The program will read two files listed above, bounds.geojson and ARD-METADATA.yaml, to create the Json file and save the latter as 'stac.json' in the above item directory.
+
+Since each day's or tile's items can run into thousands, it may take several minutes to hours to complete. Be patient! A parallelised program
+is planned to speed up the process.
 
 ## Program Details
 
