@@ -1,8 +1,4 @@
-base_url:
-    http://dea-public-data.s3-ap-southeast-2.amazonaws.com/S2_MSI_ARD
-input_dir:
-    /g/data/dz56/datacube/002/S2_MSI_ARD/packaged
-subset:
-    05S105E-10S110E
-output_dir:
-    ./Json
+base_url:       http://dea-public-data.s3-ap-southeast-2.amazonaws.com/S2_MSI_ARD
+input_dir:      /g/data/dz56/datacube/002/S2_MSI_ARD/packaged
+subset:         05S105E-10S110E
+output_dir:     Json
