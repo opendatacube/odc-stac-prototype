@@ -98,7 +98,7 @@ This file can, presumably, be read by third party [Stac Browser](http://iserv-st
 ## Program Overview
 The program, 'parse_direct.py', is a python program that can be executed as commandline, within a bash script or within crontab. The code is self-contained and requires only the standard Python modules. Parameters to the program can be given in a configuration file in YAML format or as commandline params.
 
-The program will read two files listed above, bounds.geojson and ARD-METADATA.yaml, to create the Json file and save the latter as 'stac.json' in the item directory shown above.
+The program will read two files listed above, bounds.geojson and ARD-METADATA.yaml, to create the Json file and save the latter as 'stac.json' in the above item directory.
 
 ## Program Details
 
@@ -149,4 +149,4 @@ NOTES:
 
 ## Instructions To Setup As Cron Job
 
-
+It depends on how the current setup is with regard to updating the staging area. The easiest way will be to add a line to execute the program from within the program that creates and uploads all other files to the staging area. More details shall be added here after the updating process is clearly understood.
