@@ -37,7 +37,7 @@ Last Modified                   Size           Key
                                 0              L2/
                                 0              LHTC_Tides/
                                 0              S2-Sample-Products/
-                                0              **S2_MSI_ARD/**
+                                0              S2_MSI_ARD/
                                 0              bench-data/
                                 0              ewater/
                                 0              geomedian-australia/
@@ -45,4 +45,38 @@ Last Modified                   Size           Key
                                 0              wofs-test/
 2017-12-13T03:40:52.000Z        273.6 MB       canberra-S2AB-20m.tif
 ```
+Navigating through the links will show the details as given below.
 
+`
+Path:
+http://dea-public-data.s3-ap-southeast-2.amazonaws.com / L2 /
+Contents:
+Last Modified                   Size           Key 
+---------------------------------------------------------------------------------------------
+                                               ../
+                                0              sentinel-2-nrt/
+
+http://dea-public-data.s3-ap-southeast-2.amazonaws.com / L2 / sentinel-2-nrt /
+Last Modified                   Size           Key 
+---------------------------------------------------------------------------------------------
+                                               ../
+                                0              S2MSIARD/
+
+http://dea-public-data.s3-ap-southeast-2.amazonaws.com / L2 / sentinel-2-nrt / S2MSIARD /
+Last Modified                   Size           Key 
+---------------------------------------------------------------------------------------------
+                                               ../
+                                0              2018-05-28/
+                                0              2018-05-29/
+                                
+http://dea-public-data.s3-ap-southeast-2.amazonaws.com / L2 / sentinel-2-nrt / S2MSIARD / 2018-05-28 /
+Contents:
+Last Modified                   Size           Key 
+---------------------------------------------------------------------------------------------
+                                               ../
+                                0              S2B_OPER_MSI_ARD_TL_EPAE_20180529T010118_A006405_T56HPK_N02.06/
+                                0              S2B_OPER_MSI_ARD_TL_EPAE_20180529T010118_A006405_T56JPL_N02.06/
+                                0              S2B_OPER_MSI_ARD_TL_EPAE_20180529T010118_A006405_T56JPM_N02.06/
+                                0              S2B_OPER_MSI_ARD_TL_EPAE_20180529T010118_A006405_T56JPN_N02.06/
+                                0              S2B_OPER_MSI_ARD_TL_EPAE_20180529T010118_A006405_T56JQS_N02.06/
+`
