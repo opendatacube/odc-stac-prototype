@@ -10,7 +10,7 @@ designed to make open geospatial assets searchable and crawlable. It aims to rea
 
 The data is publicly available for downloading and analysing offsite. However, in order to read and display them, it may require third party programs such as QGIS or custom programs.
 
-In order to make them STAC-compliant, so that it will have a universally accepted format, it is required to create a JSON file for each item. The specifications for it are still evolving, but the latest can be found at the links given below.
+To make them STAC-compliant, so that it will have a universally accepted format, it is required to create a JSON file for each item. The specifications for it are still evolving, but the latest can be found at the links given below.
 
 ## STAC json spec
 
