@@ -104,16 +104,14 @@ This program creates STAC catalog Jsons for the GeoTIFFs in the DEA Staging area
 Run as part of the cron job that creates and uploads GeoTIFFs from NetCDF.
 
 #### PROGRAM FLOW:
-1. Takes the following sub_dirs from the 'base_dir' specified in a YAML file
-    e.g. base_dir: /g/data/dz56/datacube/002/S2_MSI_ARD/packaged/10S150E-15S155E
-         sub_dir: S2B_OPER_MSI_ARD_TL_SGS__20171202T014216_A003860_T56LMP_N02.06
+1. Takes the base_url, input_dir, subset and output_dir specified in a YAML file or on commandline.
 
-2. Takes from the above sub_dir the following files:
+2. Takes the following files from input_dir/subset/item/:
     - bounds.geojson
     - ARD-METADATA.yaml
 
-3. Parses the above files to create the 'item.json' which contains all assets.
-    e.g. output_dir/S2B_OPER_MSI_ARD_TL_SGS__20171202T014216_A003860_T56LMP_N02.06.json
+3. Parses the above files to create the 'stac.json'.
+    - output_dir/subset/item/stac.json
     
 
 ## How to execute
@@ -131,12 +129,15 @@ Run as part of the cron job that creates and uploads GeoTIFFs from NetCDF.
         ./Json
 ```
 NOTES:
-    - Only the 'output_dir' needs write permission. In production mode it will teh same as the 'input_dir'.
-    - The 'subset' is either the date as '2018-06-29'or tile number as '05S105E-10S110E' 
-    - To generate for all subsets in a dir, use its value as 'A' (no quotes)
-        - This will be required in the case of tile numbers as subsets.
+    - Only the 'output_dir' needs write permission. In production mode it will be the same as the 'input_dir'.
+    - The 'subset' is either the date as '2018-06-29', tile number as '05S105E-10S110E' or as the case may be.
+    - To generate a stac.json for all subsets in a directory, use its value as 'A' (no quotes)
+        ```
+            subset:
+                A
+        ```
+        - It may be required in the case of tiles, as temporal data is spread across them.
     - In the case of date as subsets give just the date. 
-    - In practice, it may be necessary to dynamically create the 'stac.yaml' file or pass the params in commandline.
 
 2. Run the program from the commandline as below.
 
