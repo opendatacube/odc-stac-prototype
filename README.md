@@ -1,9 +1,3 @@
-#+TITLE: STAC Catalog Json Generation
-#+DATE: <2018-07-01 Sun>
-#+AUTHOR: Dr. Arapaut V. Sivaprasad
-#+EMAIL: Sivaprasad.Arapaut@ga.gov.au, avs@webgenie.com
-#+LANGUAGE: en
-#+URL: https://github.com/opendatacube/odc-stac-prototype
 
 # STAC Catalog Json Generation
 
@@ -165,3 +159,13 @@ or
 It depends on how the current setup is with regard to updating the staging area. The easiest way will be to add a line to execute the program from within the program that creates and uploads all other files to the staging area. 
 
 More details shall be added here after the updating process is clearly understood.
+
+_____________________________________________________________________________________________________________
+```
+TITLE: STAC Catalog Json Generation
+DATE: <2018-07-01 Sun>
+AUTHOR: Dr. Arapaut V. Sivaprasad
+EMAIL: Sivaprasad.Arapaut@ga.gov.au, avs@webgenie.com
+LANGUAGE: en
+URL: https://github.com/opendatacube/odc-stac-prototype
+```
