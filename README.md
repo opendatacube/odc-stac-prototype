@@ -4,22 +4,22 @@
 
 ## What is STAC?
 The [SpatioTemporal Asset Catalog specification](https://github.com/radiantearth/stac-spec/) is a simple specification being
-designed to make open geospatial assets searchable and crawlable. It aims to realise the dream of enabling users to search for imagery and other assets across multiple providers.[[Ref](https://gist.github.com/omad/da6f740be0ead467c77c80d66701450f#file-spatio-temporal-access-catalogues-org)]
+designed to make open geospatial assets searchable and crawlable. It aims to realise the dream of enabling users to search for imagery and other assets across multiple providers.[[Ref-1](https://gist.github.com/omad/da6f740be0ead467c77c80d66701450f#file-spatio-temporal-access-catalogues-org)]
 
-The word, "Spatio-Temporal", means "belonging to both space and time". The data uploaded in the [DEA Data Staging Area](http://dea-public-data.s3-website-ap-southeast-2.amazonaws.com/) on a daily basis is Spatio-temporal. It contains all the GeoTIFF files and their associated metadata collected over certain time intervals. Some are updated on a daily basis, whereas some are at random.
+"Spatio-Temporal" means "belonging to both space and time". The data uploaded in the [DEA Data Staging Area](http://dea-public-data.s3-website-ap-southeast-2.amazonaws.com/) on a daily basis is spatio-temporal. It contains all the GeoTIFF files and their associated metadata collected over certain time intervals. Some are updated on a daily basis, whereas some others are at random.
 
-The data is publicly available for downloading and analysing offsite. 
+The data is publicly available for downloading and analysing offsite. However, in order to read and display them, it may require third party programs such as QGIS or custom programs.
 
-However, in order to make them STAC-compliant, it is required to create a JSON file for each item. The specifications for it are still evolving.
+In order to make them STAC-compliant, so that it will have a universally accepted format, it is required to create a JSON file for each item. The specifications for it are still evolving, but the latest can be found at the links given below.
 
 ## STAC json spec
 
-The core of a Spatio-Temporal Asset Catalog (STAC) is set of JSON fields defined by the [STAC json spec](https://github.com/radiantearth/stac-spec/blob/master/json-spec/json-spec.md). These define an `Item` of a catalog, which can be served up in static or dynamic catalogs.[[Ref](https://github.com/radiantearth/stac-spec/tree/master/json-spec)] 
+The core of a Spatio-Temporal Asset Catalog (STAC) is set of JSON fields defined by the [STAC json spec](https://github.com/radiantearth/stac-spec/blob/master/json-spec/json-spec.md). These define an `Item` of a catalog, which can be served up in static or dynamic catalogs.[[Ref-2](https://github.com/radiantearth/stac-spec/tree/master/json-spec)] 
 
 
 ### This program is designed to create the STAC-compliant JSON file for the items.
 
-It is expected to be part of the cron jobs that daily update the DEA Data Staging area. 
+It is expected to be part of the cron jobs that daily update the DEA Data Staging area, whose structure is given below. 
 
 ```
 DEA Data Staging Area
@@ -45,14 +45,8 @@ Last Modified                   Size           Key
                                 0              projects/
                                 0              wofs-test/
 2017-12-13T03:40:52.000Z        273.6 MB       canberra-S2AB-20m.tif
-```
-Navigating through the links will show the details as given below.
 
-```
-Path:
 http://dea-public-data.s3-ap-southeast-2.amazonaws.com / L2 /
-Contents:
-Last Modified                   Size           Key 
 ---------------------------------------------------------------------------------------------
                                                ../
                                 0              sentinel-2-nrt/
@@ -92,9 +86,9 @@ http://dea-public-data.s3-ap-southeast-2.amazonaws.com / L2 / sentinel-2-nrt / S
 2018-05-29T15:37:47.000Z        23.4 kB        ARD-METADATA.yaml
 
 ```
-##### We need a STAC-compliant Json file in the last directory as e.g. S2B_OPER_MSI_ARD_TL_EPAE_20180529T010118_A006405_T56HPK_N02.06.json
+##### We need a STAC-compliant Json file, STAC.json, in the last directory above.
 
-This file can, presumably, be read by third party [Stac Browser](http://iserv-stac.netlify.com/) without a need to write their own code to interpret the data.
+This STAC.json can, presumably, be read by a third party STAC browser similar to [this](http://iserv-stac.netlify.com/) without a need to write separate code to interpret the data.
 
 ## Program Overview
 The program, 'parse_direct.py', is a python program that can be executed as commandline, within a bash script or within crontab. The code is self-contained and requires only the standard Python modules. Parameters to the program can be given in a configuration file in YAML format or as commandline params.
@@ -106,8 +100,8 @@ The program will read two files listed above, bounds.geojson and ARD-METADATA.ya
 #### DESCRIPTION:
 This program creates STAC catalog Jsons for the GeoTIFFs in the DEA Staging area.
 
-#### HOW:
-    - Run as part of the cron job that creates and uploads GeoTIFFs from NetCDF.
+#### HOW TO USE:
+Run as part of the cron job that creates and uploads GeoTIFFs from NetCDF.
 
 #### PROGRAM FLOW:
 1. Takes the following sub_dirs from the 'base_dir' specified in a YAML file
@@ -122,12 +116,11 @@ This program creates STAC catalog Jsons for the GeoTIFFs in the DEA Staging area
     e.g. output_dir/S2B_OPER_MSI_ARD_TL_SGS__20171202T014216_A003860_T56LMP_N02.06.json
     
 
-## Instructions To Run
+## How to execute
 
 1. Create a config file, e.g. stac.yaml or any other name, with the following content. 
 
 ```
-"""
     base_url:
         http://dea-public-data.s3-ap-southeast-2.amazonaws.com/S2_MSI_ARD
     input_dir:
@@ -149,12 +142,12 @@ NOTES:
 
 > parse_direct.py stac.yaml
 
-or
+or, without creating the stac.yaml:
 
 > parse_direct.py --base_url=url --input_dir=path --subset=str --output_dir=path
 
 
-## Instructions To Setup As Cron Job
+## How to setup as a cron job
 
 It depends on how the current setup is with regard to updating the staging area. The easiest way will be to add a line to execute the program from within the program that creates and uploads all other files to the staging area. 
 
