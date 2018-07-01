@@ -8,6 +8,14 @@
 DESCRIPTION:
 This program creates STAC catalog JSONs for the GeoTIFFs in the DEA Data Staging area.
 
+This is a parallelised version of 'parse_direct.py' and gives ~20X speed improvement
+over the serial program. However, this may not be suitable for the cron jobs if they
+run on shared servers. You must start an interactive queue on Raijin (qsub -I) to run this.
+
+Though it will auto detect the VDI and Raijin login nodes and exit,
+there is no check for other hostnames. Therefore, running this on other hosts may
+cause high load on the server and you may upset other users. So, be careful!
+
 HOW:
     - Run as part of the cron job that creates and uploads GeoTIFFs from NetCDF.
 
@@ -34,7 +42,7 @@ import socket
 import sys
 hostname = socket.gethostname()
 if (('vdi' in hostname) or ('raijin' in hostname)):
-    print ("Not safe to run the parallel program on login node. Start a 'qsub -I' session. Exiting!")
+    print ("It is not safe to run the parallel program on a login node. Start a 'qsub -I' session. Exiting!")
     sys.exit()
 
 # Globals
