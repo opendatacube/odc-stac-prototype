@@ -30,9 +30,15 @@ import multiprocessing
 import time
 from multiprocessing import Pool
 from subprocess import Popen, PIPE
+import socket
+import sys
+hostname = socket.gethostname()
+if (('vdi' in hostname) or ('raijin' in hostname)):
+    print ("Not safe to run the parallel program on login node. Start a 'qsub -I' session. Exiting!")
+    sys.exit()
+
 # Globals
-cores = 128 # Number of workers spawned for each iteration. A value of 16 is the optimum on one node. 
-        # Not sure how it works when using 32 or more cores on more than one node.
+cores = 64 # Number of workers spawned for each iteration. A value of 64 is the optimum on one node. 
 limit = 0
 input_dir = ''
 base_url = ''
@@ -143,7 +149,7 @@ def parallel_process():
     items_dirs = os.listdir(input_dir)
     pool = Pool(processes=cores)              # start $np worker processes. It is the optimum
     if not limit: limit = len(items_dirs)
-    print("Cores: {}; Limit: {}".format(cores,limit))
+    print("Cores: {}; Items to be processed: {}".format(cores,limit))
     pool.map(create_jsons, items_dirs[:limit]) # Send $cores files each time until the set limit         
     print("Finished !")    
 
@@ -159,7 +165,7 @@ Usage:\n\
     {} config.yaml. Default is './stac.yaml'. \n\
 \n\
     Or, commandline as:\n\
-        {} --base_url=url --input_dir=path --subset=str --output_dir=path\n\
+        {} --base_urlp=url --input_dirp=path --subsetp=str --output_dirp=path\n\
 \n\
     Output files (output_dir/subset/item/STAC.json) will be created for each item.\n\
 \n\
@@ -175,57 +181,58 @@ Usage:\n\
 # ------------------------------------------------------------------------------
 @click.command(name='parse_direct')
 @click.argument('stac_config_file', type=str, default='stac.yaml', metavar='STAC_CONFIG_FILE')
-#@click.option('--info', type=str, help='Type --info=yes to get additional info.')
+@click.option('--info', type=str, help='Type --info=yes to get additional info.')
 @click.option('--base_urlp', type=str, help='URL of the product. e.g. https://FQDN/S2_MSI_ARD',default='')
 @click.option('--input_dirp', type=str, help='Full path of the directory where the subsets are. e.g. /g/data/dz56/datacube/002/S2_MSI_ARD/packaged',default='')
 @click.option('--subsetp', type=str, help='Date, tile_no, etc. that lists the items. e.g. 2018-06-29, 05S105E-10S110E, etc. ',default='')
 @click.option('--output_dirp', type=str, help='Relative or full path of the output directory where the STAC.json will be written under "subset/item/"',default='')
-def main(stac_config_file,base_urlp,input_dirp,subsetp,output_dirp):
+def main(stac_config_file,base_urlp,input_dirp,subsetp,output_dirp,info):
     global input_dir,base_url,output_dir,subset
     input_dir = input_dirp
     base_url = base_urlp
     output_dir = output_dirp
     subset = subsetp
-    if ((not base_url) or (not input_dir) or (not subset) or (not output_dir)):  # Specify all or none in commandline. If any is missing, it will use the config file.
-        config = yaml.load(open(stac_config_file))
-        base_url = config['base_url']
-        base_url = os.path.join(base_url, '')
-        
-        input_dir = config['input_dir']
-
-        # Subset is defined separately so that it can be a date or tile number
-        subset = config['subset'] 
-    
-        output_dir = config['output_dir']
-
-        output_dir = os.path.join(output_dir, '')
-        input_dir = os.path.join(input_dir, '')
-        # Specify a subset as 2018-06-30 for L2, or as 05S105E-10S110E for S2_MSI_ARD. 
-        # Option 'A' is suitable for S2_MSI_ARD where multiple tiles are involved
-        if(subset is not 'A'):
-            subset = os.path.join(subset, '')
-    
-            base_url = base_url + subset
-            input_dir = input_dir + subset
+    if (info): usage()
+    else:
+        if ((not base_url) or (not input_dir) or (not subset) or (not output_dir)):  # Specify all or none in commandline. If any is missing, it will use the config file.
+            config = yaml.load(open(stac_config_file))
+            base_url = config['base_url']
+            base_url = os.path.join(base_url, '')
             
-            # Iterate through all items abd create a JSON file for each.
-            parallel_process()
-#            create_jsons(input_dir,base_url,output_dir,subset)
-        else:
-            subsets = os.listdir(input_dir)
-            for subset in subsets:
+            input_dir = config['input_dir']
+    
+            # Subset is defined separately so that it can be a date or tile number
+            subset = config['subset'] 
+        
+            output_dir = config['output_dir']
+    
+            output_dir = os.path.join(output_dir, '')
+            input_dir = os.path.join(input_dir, '')
+            # Specify a subset as 2018-06-30 for L2, or as 05S105E-10S110E for S2_MSI_ARD. 
+            # Option 'A' is suitable for S2_MSI_ARD where multiple tiles are involved
+            if(subset is not 'A'):
                 subset = os.path.join(subset, '')
         
                 base_url = base_url + subset
                 input_dir = input_dir + subset
                 
-                output_subset_dir = output_dir + subset
-                if not os.path.exists(output_subset_dir):
-                    os.makedirs(output_subset_dir)
-
                 # Iterate through all items abd create a JSON file for each.
-                create_jsons(input_dir,base_url,output_dir,subset)
-#                break # Activate for limiting the iteration to just one subset. 
+                parallel_process()
+            else:
+                subsets = os.listdir(input_dir)
+                for subset in subsets:
+                    subset = os.path.join(subset, '')
+            
+                    base_url = base_url + subset
+                    input_dir = input_dir + subset
+                    
+                    output_subset_dir = output_dir + subset
+                    if not os.path.exists(output_subset_dir):
+                        os.makedirs(output_subset_dir)
+    
+                    # Iterate through all items abd create a JSON file for each.
+                    create_jsons(input_dir,base_url,output_dir,subset)
+#                    break # Activate for limiting the iteration to just one subset. 
 
 # ------------------------------------------------------------------------------
 # Standard boilerplate to call the main() function.
