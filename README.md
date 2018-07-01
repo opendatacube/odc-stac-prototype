@@ -88,7 +88,7 @@ http://dea-public-data.s3-ap-southeast-2.amazonaws.com / L2 / sentinel-2-nrt / S
 ```
 ##### We need a STAC-compliant Json file, STAC.json, in the last directory above.
 
-This STAC.json can, presumably, be read by a third party STAC browser similar to [this](http://iserv-stac.netlify.com/) without a need to write separate code to interpret the data.
+This STAC.json can, presumably, be read by a third party STAC browser similar to [this](http://iserv-stac.netlify.com/item/2014/01/02/IPR201401020901061496N02371W) without a need to write separate code to interpret the data.
 
 ## Program Overview
 The program, 'parse_direct.py', is a python program that can be executed as commandline, within a bash script or within crontab. The code is self-contained and requires only the standard Python modules. Parameters to the program can be given in a configuration file in YAML format or as commandline params.
